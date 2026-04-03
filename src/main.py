@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask, flash, redirect, url_for, send_from_directory
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from src.task_management.auth.models import User
 from src.task_management.auth.routes import auth_bp
 from src.task_management.tasks.routes import task_bp
@@ -62,6 +62,13 @@ def create_web_app():
     # Registering my blueprints for auth & tasks modules
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(task_bp, url_prefix='/tasks')
+
+    @app.route('/')
+    def home():
+        """Landing route for browser visits to the application root."""
+        if current_user.is_authenticated:
+            return redirect(url_for('tasks.dashboard'))
+        return redirect(url_for('auth.login'))
     
     # Serving OpenAPi spec file from the static directory.
     @app.route('/static/swagger.json')
